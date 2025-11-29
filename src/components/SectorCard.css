@@ -1,0 +1,93 @@
+.sector-card {
+  background-color: var(--bg-card);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease-in-out;
+  border: 1px solid var(--border-color);
+}
+
+.sector-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-color);
+}
+
+.sector-header {
+  margin-bottom: 1.5rem;
+}
+
+.sector-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.sector-description {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.sector-stats {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.stat-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.leading-stocks {
+  border-top: 1px solid var(--border-color);
+  padding-top: 1.5rem;
+}
+
+.stocks-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.stocks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .sector-card {
+    padding: 1.25rem;
+  }
+  
+  .sector-stats {
+    gap: 1rem;
+  }
+  
+  .stat-value {
+    font-size: 0.875rem;
+  }
+  
+  .stocks-list {
+    gap: 0.5rem;
+  }
+}
