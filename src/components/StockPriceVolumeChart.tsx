@@ -19,6 +19,12 @@ interface StockPriceVolumeChartProps {
   tsCode: string;
 }
 
+const formatAmountToYi = (amountInThousand: number): string => {
+  // 接口返回为“千元”，1 亿 = 1e8 元 = 1e5 * 1000 元
+  const amountYi = amountInThousand / 100000;
+  return amountYi.toFixed(2);
+};
+
 const StockPriceVolumeChart: React.FC<StockPriceVolumeChartProps> = ({
   data,
   stockName,
@@ -104,7 +110,20 @@ const StockPriceVolumeChart: React.FC<StockPriceVolumeChartProps> = ({
                 axisLine={false}
                 tick={{ fontSize: 12 }}
               />
-              <Tooltip />
+              <Tooltip
+                formatter={(value: number, name: string, info: any) => {
+                  if (name === '成交量') {
+                    const amountYi = formatAmountToYi(
+                      info?.payload?.amount ?? 0
+                    );
+                    return [
+                      value,
+                      `成交量（成交额：${amountYi}亿）`,
+                    ];
+                  }
+                  return [value, name];
+                }}
+              />
               <Legend />
               <Bar
                 dataKey="vol"
