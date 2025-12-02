@@ -19,6 +19,23 @@ export interface ProcessedStockData extends StockData {
   price_diff_percent: number; // 价格差值百分比
 }
 
+// 价格 & 成交量数据类型
+export interface PriceVolumePoint {
+  trade_date: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  vol: number;
+  amount: number;
+}
+
+export interface PriceVolumeResponse {
+  ts_code: string;
+  count: number;
+  data: PriceVolumePoint[];
+}
+
 const API_BASE_URL = 'http://8.138.97.142:8000';
 
 /**
@@ -56,6 +73,30 @@ export const fetchLargCapBelowAvgPrice = async (
     return processedData;
   } catch (error) {
     console.error('Failed to fetch stock data:', error);
+    throw error;
+  }
+};
+
+/**
+ * 获取单只股票近一年价格 & 成交量数据
+ */
+export const fetchPriceVolume1Y = async (
+  tsCode: string
+): Promise<PriceVolumePoint[]> => {
+  try {
+    const url = `${API_BASE_URL}/price_volume_1y?ts_code=${encodeURIComponent(
+      tsCode
+    )}`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result: PriceVolumeResponse = await response.json();
+    return result.data;
+  } catch (error) {
+    console.error('Failed to fetch price & volume data:', error);
     throw error;
   }
 };

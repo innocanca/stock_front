@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  ProcessedStockData, 
-  fetchLargCapBelowAvgPrice, 
-  formatMarketValue, 
-  formatPriceDiff, 
-  formatPercentage 
+import {
+  ProcessedStockData,
+  fetchLargCapBelowAvgPrice,
+  formatMarketValue,
+  formatPriceDiff,
+  formatPercentage,
+  fetchPriceVolume1Y,
+  PriceVolumePoint,
 } from '../services/stockApi';
+import StockPriceVolumeChart from './StockPriceVolumeChart';
 import './UndervaluedStocks.css';
 
 interface UndervaluedStocksProps {
@@ -20,6 +23,12 @@ const UndervaluedStocks: React.FC<UndervaluedStocksProps> = ({
   const [stocks, setStocks] = useState<ProcessedStockData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTsCode, setSelectedTsCode] = useState<string | null>(null);
+  const [selectedStockName, setSelectedStockName] = useState<string>('');
+  const [chartData, setChartData] = useState<PriceVolumePoint[] | null>(null);
+  const [chartLoading, setChartLoading] = useState<boolean>(false);
+  const [chartError, setChartError] = useState<string | null>(null);
+  const [isChartModalOpen, setIsChartModalOpen] = useState<boolean>(false);
 
   const loadStockData = async () => {
     setLoading(true);
@@ -40,6 +49,28 @@ const UndervaluedStocks: React.FC<UndervaluedStocksProps> = ({
 
   const handleRefresh = () => {
     loadStockData();
+  };
+
+  const handleSelectStock = async (stock: ProcessedStockData) => {
+    setSelectedTsCode(stock.ts_code);
+    setSelectedStockName(stock.name);
+    setChartLoading(true);
+    setChartError(null);
+    setChartData(null);
+    setIsChartModalOpen(true);
+
+    try {
+      const data = await fetchPriceVolume1Y(stock.ts_code);
+      setChartData(data);
+    } catch (err) {
+      setChartError(err instanceof Error ? err.message : '获取价格/成交量数据失败');
+    } finally {
+      setChartLoading(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsChartModalOpen(false);
   };
 
   if (loading) {
@@ -100,7 +131,13 @@ const UndervaluedStocks: React.FC<UndervaluedStocksProps> = ({
           </thead>
           <tbody>
             {stocks.map((stock, index) => (
-              <tr key={stock.ts_code} className="stock-row">
+              <tr
+                key={stock.ts_code}
+                className={`stock-row ${
+                  selectedTsCode === stock.ts_code ? 'selected' : ''
+                }`}
+                onClick={() => handleSelectStock(stock)}
+              >
                 <td className="rank">{index + 1}</td>
                 <td className="stock-code">{stock.ts_code}</td>
                 <td className="stock-name">{stock.name}</td>
@@ -119,6 +156,59 @@ const UndervaluedStocks: React.FC<UndervaluedStocksProps> = ({
           </tbody>
         </table>
       </div>
+
+      {isChartModalOpen && selectedTsCode && (
+        <div
+          className="stock-chart-modal-backdrop"
+          onClick={handleCloseModal}
+        >
+          <div
+            className="stock-chart-modal"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="stock-chart-modal-header">
+              <div>
+                <h3>
+                  {selectedStockName}（{selectedTsCode}）
+                </h3>
+                <p className="stock-chart-modal-subtitle">
+                  近一年价格走势（红线为收盘价）与成交量（蓝色柱状）
+                </p>
+              </div>
+              <button
+                type="button"
+                className="stock-chart-modal-close"
+                onClick={handleCloseModal}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="stock-chart-modal-body">
+              {chartLoading && (
+                <div className="stock-chart-loading">
+                  <div className="spinner" />
+                  <p>正在加载股票走势图...</p>
+                </div>
+              )}
+
+              {!chartLoading && chartError && (
+                <div className="stock-chart-error">
+                  <p>获取股票走势图失败：{chartError}</p>
+                </div>
+              )}
+
+              {!chartLoading && !chartError && chartData && (
+                <StockPriceVolumeChart
+                  data={chartData}
+                  stockName={selectedStockName}
+                  tsCode={selectedTsCode}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {stocks.length === 0 && !loading && !error && (
         <div className="no-data">
