@@ -124,3 +124,4 @@ export const formatPercentage = (percent: number): string => {
   const prefix = percent >= 0 ? '+' : '';
   return `${prefix}${percent.toFixed(2)}%`;
 };
+
