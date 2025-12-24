@@ -1,26 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import {
-  ProcessedStockData,
-  fetchLargCapBelowAvgPrice,
-  formatMarketValue,
-  formatPriceDiff,
-  formatPercentage,
+  WeeklyVolumeSurgeData,
+  fetchWeeklyVolumeSurge,
   fetchPriceVolume1Y,
   PriceVolumePoint,
 } from '../services/stockApi';
 import StockPriceVolumeChart from './StockPriceVolumeChart';
-import './UndervaluedStocks.css';
+import './WeeklyVolumeSurge.css';
 
-interface UndervaluedStocksProps {
-  minMv?: number;
-  maxPe?: number;
-}
-
-const UndervaluedStocks: React.FC<UndervaluedStocksProps> = ({
-  minMv = 10000000,
-  maxPe = 30.0
-}) => {
-  const [stocks, setStocks] = useState<ProcessedStockData[]>([]);
+const WeeklyVolumeSurge: React.FC = () => {
+  const [stocks, setStocks] = useState<WeeklyVolumeSurgeData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedTsCode, setSelectedTsCode] = useState<string | null>(null);
@@ -34,7 +23,7 @@ const UndervaluedStocks: React.FC<UndervaluedStocksProps> = ({
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchLargCapBelowAvgPrice(minMv, maxPe);
+      const data = await fetchWeeklyVolumeSurge();
       setStocks(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : '获取数据失败');
@@ -45,15 +34,15 @@ const UndervaluedStocks: React.FC<UndervaluedStocksProps> = ({
 
   useEffect(() => {
     loadStockData();
-  }, [minMv, maxPe]);
+  }, []);
 
   const handleRefresh = () => {
     loadStockData();
   };
 
-  const handleSelectStock = async (stock: ProcessedStockData) => {
+  const handleSelectStock = async (stock: WeeklyVolumeSurgeData) => {
     setSelectedTsCode(stock.ts_code);
-    setSelectedStockName(stock.name);
+    setSelectedStockName(stock.名称);
     setChartLoading(true);
     setChartError(null);
     setChartData(null);
@@ -73,12 +62,23 @@ const UndervaluedStocks: React.FC<UndervaluedStocksProps> = ({
     setIsChartModalOpen(false);
   };
 
+  const formatValue = (val: any) => {
+    if (val === null || val === undefined) return '-';
+    if (typeof val === 'number') return val.toFixed(2);
+    return val;
+  };
+
+  const formatPercent = (val: number) => {
+    const prefix = val >= 0 ? '+' : '';
+    return `${prefix}${val.toFixed(2)}%`;
+  };
+
   if (loading) {
     return (
-      <div className="undervalued-stocks loading">
+      <div className="weekly-volume-surge loading">
         <div className="loading-spinner">
           <div className="spinner"></div>
-          <p>正在获取股票数据...</p>
+          <p>正在获取主板周线放量数据...</p>
         </div>
       </div>
     );
@@ -86,7 +86,7 @@ const UndervaluedStocks: React.FC<UndervaluedStocksProps> = ({
 
   if (error) {
     return (
-      <div className="undervalued-stocks error">
+      <div className="weekly-volume-surge error">
         <div className="error-message">
           <h3>⚠️ 数据获取失败</h3>
           <p>{error}</p>
@@ -99,9 +99,9 @@ const UndervaluedStocks: React.FC<UndervaluedStocksProps> = ({
   }
 
   return (
-    <div className="undervalued-stocks">
+    <div className="weekly-volume-surge">
       <div className="stocks-header">
-        <h2>低估蓝筹白马</h2>
+        <h2>主板周线放量</h2>
         <div className="header-info">
           <span className="stock-count">共找到 {stocks.length} 只股票</span>
           <button onClick={handleRefresh} className="refresh-button">
@@ -111,7 +111,7 @@ const UndervaluedStocks: React.FC<UndervaluedStocksProps> = ({
       </div>
 
       <div className="filter-info">
-        <span>筛选条件: 市值≥{formatMarketValue(minMv)}, PE≤{maxPe}, 现价低于1年均价</span>
+        <span>筛选条件: 主板周线成交量明显放大，PE处于低位，可能存在放量突破机会</span>
       </div>
 
       <div className="stocks-table-container">
@@ -122,11 +122,12 @@ const UndervaluedStocks: React.FC<UndervaluedStocksProps> = ({
               <th>股票代码</th>
               <th>股票名称</th>
               <th>现价</th>
-              <th>1年均价</th>
-              <th>价格差值</th>
-              <th>差值百分比</th>
-              <th>市值</th>
+              <th>市值(亿)</th>
               <th>PE(TTM)</th>
+              <th>周放量倍数</th>
+              <th>周涨跌幅%</th>
+              <th>是否刚启动</th>
+              <th>最近周线日期</th>
             </tr>
           </thead>
           <tbody>
@@ -140,17 +141,18 @@ const UndervaluedStocks: React.FC<UndervaluedStocksProps> = ({
               >
                 <td className="rank">{index + 1}</td>
                 <td className="stock-code">{stock.ts_code}</td>
-                <td className="stock-name">{stock.name}</td>
-                <td className="current-price">¥{stock.current_close.toFixed(2)}</td>
-                <td className="avg-price">¥{stock.avg_close_1y.toFixed(2)}</td>
-                <td className={`price-diff ${stock.price_diff < 0 ? 'negative' : 'positive'}`}>
-                  {formatPriceDiff(stock.price_diff)}
+                <td className="stock-name">{stock.名称}</td>
+                <td className="current-price">¥{stock.现价.toFixed(2)}</td>
+                <td className="market-value">{stock["市值(亿)"].toFixed(2)}</td>
+                <td className="pe-ratio">{formatValue(stock["PE(TTM)"])}</td>
+                <td className="volume-multiplier">{stock.周放量倍数.toFixed(2)}</td>
+                <td className={`price-change ${stock["最近周涨跌幅%"] >= 0 ? 'positive' : 'negative'}`}>
+                  {formatPercent(stock["最近周涨跌幅%"])}
                 </td>
-                <td className={`price-diff-percent ${stock.price_diff_percent < 0 ? 'negative' : 'positive'}`}>
-                  {formatPercentage(stock.price_diff_percent)}
+                <td className="is-starting">
+                  {stock.是否刚启动 ? <span className="tag starting">是</span> : <span className="tag">否</span>}
                 </td>
-                <td className="market-value">{formatMarketValue(stock.total_mv_10k)}</td>
-                <td className="pe-ratio">{stock.pe_ttm.toFixed(2)}</td>
+                <td className="date">{stock.最近周线日期}</td>
               </tr>
             ))}
           </tbody>
@@ -219,4 +221,5 @@ const UndervaluedStocks: React.FC<UndervaluedStocksProps> = ({
   );
 };
 
-export default UndervaluedStocks;
+export default WeeklyVolumeSurge;
+

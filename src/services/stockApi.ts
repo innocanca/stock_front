@@ -36,6 +36,23 @@ export interface PriceVolumeResponse {
   data: PriceVolumePoint[];
 }
 
+export interface WeeklyVolumeSurgeData {
+  ts_code: string;
+  名称: string;
+  "市值(亿)": number;
+  "PE(TTM)": number | null;
+  现价: number;
+  周放量倍数: number;
+  是否刚启动: boolean;
+  "最近周涨跌幅%": number;
+  最近周线日期: string;
+}
+
+export interface WeeklyVolumeSurgeResponse {
+  count: number;
+  data: WeeklyVolumeSurgeData[];
+}
+
 const API_BASE_URL = 'http://8.138.97.142:8000';
 
 /**
@@ -97,6 +114,26 @@ export const fetchPriceVolume1Y = async (
     return result.data;
   } catch (error) {
     console.error('Failed to fetch price & volume data:', error);
+    throw error;
+  }
+};
+
+/**
+ * 获取主板周线放量数据
+ */
+export const fetchWeeklyVolumeSurge = async (): Promise<WeeklyVolumeSurgeData[]> => {
+  try {
+    const url = `${API_BASE_URL}/low_pe_volume_surge`;
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result: WeeklyVolumeSurgeResponse = await response.json();
+    return result.data;
+  } catch (error) {
+    console.error('Failed to fetch weekly volume surge data:', error);
     throw error;
   }
 };

@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import Header from './components/Header';
 import SectorGrid from './components/SectorGrid';
 import UndervaluedStocks from './components/UndervaluedStocks';
+import WeeklyVolumeSurge from './components/WeeklyVolumeSurge';
 import { mockSectors } from './data/mockData';
 import './App.css';
 
 function App() {
-  const [activeTab, setActiveTab] = useState<'sectors' | 'undervalued'>('undervalued');
+  const [activeTab, setActiveTab] = useState<'sectors' | 'undervalued' | 'weeklyVolumeSurge'>('undervalued');
 
   return (
     <div className="app">
@@ -22,7 +23,13 @@ function App() {
               className={`tab-button ${activeTab === 'undervalued' ? 'active' : ''}`}
               onClick={() => setActiveTab('undervalued')}
             >
-              低估值股票
+              低估蓝筹白马
+            </button>
+            <button 
+              className={`tab-button ${activeTab === 'weeklyVolumeSurge' ? 'active' : ''}`}
+              onClick={() => setActiveTab('weeklyVolumeSurge')}
+            >
+              主板周线放量
             </button>
             <button 
               className={`tab-button ${activeTab === 'sectors' ? 'active' : ''}`}
@@ -35,6 +42,7 @@ function App() {
           {/* 内容区域 */}
           <div className="tab-content">
             {activeTab === 'undervalued' && <UndervaluedStocks />}
+            {activeTab === 'weeklyVolumeSurge' && <WeeklyVolumeSurge />}
             {activeTab === 'sectors' && <SectorGrid sectors={mockSectors} />}
           </div>
         </div>
