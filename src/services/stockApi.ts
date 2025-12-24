@@ -86,6 +86,21 @@ export interface EtfVolumeSurgeResponse {
   data: EtfVolumeSurgeData[];
 }
 
+export interface SmartPortfolioItem {
+  ts_code: string;
+  名称: string;
+  策略标签: string;
+  行业: string;
+  核心指标: string;
+  权重分数: number;
+}
+
+export interface SmartPortfolioResponse {
+  count: number;
+  data: SmartPortfolioItem[];
+  diversification: string;
+}
+
 const API_BASE_URL = 'http://8.138.97.142:8000';
 
 /**
@@ -211,6 +226,26 @@ export const fetchEtfVolumeSurge = async (
     return result.data;
   } catch (error) {
     console.error('Failed to fetch ETF volume surge data:', error);
+    throw error;
+  }
+};
+
+/**
+ * 获取智能投资组合数据
+ */
+export const fetchSmartPortfolio = async (limit: number = 5): Promise<SmartPortfolioResponse> => {
+  try {
+    const url = `${API_BASE_URL}/smart_portfolio?limit=${limit}`;
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result: SmartPortfolioResponse = await response.json();
+    return result;
+  } catch (error) {
+    console.error('Failed to fetch smart portfolio data:', error);
     throw error;
   }
 };

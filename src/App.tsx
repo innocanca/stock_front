@@ -5,11 +5,12 @@ import UndervaluedStocks from './components/UndervaluedStocks';
 import WeeklyVolumeSurge from './components/WeeklyVolumeSurge';
 import BottomReversal from './components/BottomReversal';
 import EtfVolumeSurge from './components/EtfVolumeSurge';
+import SmartPortfolio from './components/SmartPortfolio';
 import { mockSectors } from './data/mockData';
 import './App.css';
 
 function App() {
-  const [activeTab, setActiveTab] = useState<'sectors' | 'undervalued' | 'weeklyVolumeSurge' | 'bottomReversal' | 'etfVolumeSurge'>('undervalued');
+  const [activeTab, setActiveTab] = useState<'sectors' | 'undervalued' | 'weeklyVolumeSurge' | 'bottomReversal' | 'etfVolumeSurge' | 'smartPortfolio'>('undervalued');
 
   return (
     <div className="app">
@@ -46,6 +47,12 @@ function App() {
               ETF 放量策略
             </button>
             <button 
+              className={`tab-button ${activeTab === 'smartPortfolio' ? 'active' : ''}`}
+              onClick={() => setActiveTab('smartPortfolio')}
+            >
+              智能组合
+            </button>
+            <button 
               className={`tab-button ${activeTab === 'sectors' ? 'active' : ''}`}
               onClick={() => setActiveTab('sectors')}
             >
@@ -59,6 +66,7 @@ function App() {
             {activeTab === 'weeklyVolumeSurge' && <WeeklyVolumeSurge />}
             {activeTab === 'bottomReversal' && <BottomReversal />}
             {activeTab === 'etfVolumeSurge' && <EtfVolumeSurge />}
+            {activeTab === 'smartPortfolio' && <SmartPortfolio />}
             {activeTab === 'sectors' && <SectorGrid sectors={mockSectors} />}
           </div>
         </div>
