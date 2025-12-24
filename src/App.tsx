@@ -3,11 +3,13 @@ import Header from './components/Header';
 import SectorGrid from './components/SectorGrid';
 import UndervaluedStocks from './components/UndervaluedStocks';
 import WeeklyVolumeSurge from './components/WeeklyVolumeSurge';
+import BottomReversal from './components/BottomReversal';
+import EtfVolumeSurge from './components/EtfVolumeSurge';
 import { mockSectors } from './data/mockData';
 import './App.css';
 
 function App() {
-  const [activeTab, setActiveTab] = useState<'sectors' | 'undervalued' | 'weeklyVolumeSurge'>('undervalued');
+  const [activeTab, setActiveTab] = useState<'sectors' | 'undervalued' | 'weeklyVolumeSurge' | 'bottomReversal' | 'etfVolumeSurge'>('undervalued');
 
   return (
     <div className="app">
@@ -32,6 +34,18 @@ function App() {
               主板周线放量
             </button>
             <button 
+              className={`tab-button ${activeTab === 'bottomReversal' ? 'active' : ''}`}
+              onClick={() => setActiveTab('bottomReversal')}
+            >
+              底部反转
+            </button>
+            <button 
+              className={`tab-button ${activeTab === 'etfVolumeSurge' ? 'active' : ''}`}
+              onClick={() => setActiveTab('etfVolumeSurge')}
+            >
+              ETF 放量策略
+            </button>
+            <button 
               className={`tab-button ${activeTab === 'sectors' ? 'active' : ''}`}
               onClick={() => setActiveTab('sectors')}
             >
@@ -43,6 +57,8 @@ function App() {
           <div className="tab-content">
             {activeTab === 'undervalued' && <UndervaluedStocks />}
             {activeTab === 'weeklyVolumeSurge' && <WeeklyVolumeSurge />}
+            {activeTab === 'bottomReversal' && <BottomReversal />}
+            {activeTab === 'etfVolumeSurge' && <EtfVolumeSurge />}
             {activeTab === 'sectors' && <SectorGrid sectors={mockSectors} />}
           </div>
         </div>

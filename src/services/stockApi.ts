@@ -53,6 +53,39 @@ export interface WeeklyVolumeSurgeResponse {
   data: WeeklyVolumeSurgeData[];
 }
 
+export interface BottomReversalData {
+  ts_code: string;
+  代码: string;
+  名称: string;
+  "市值(亿)": number;
+  现价: number;
+  "本周涨幅%": number;
+  放量倍数: number;
+  连续下跌周数: number;
+  最近周线日期: string;
+}
+
+export interface BottomReversalResponse {
+  count: number;
+  data: BottomReversalData[];
+}
+
+export interface EtfVolumeSurgeData {
+  ts_code: string;
+  代码: string;
+  名称: string;
+  最近周线截止日: string;
+  "最近一周成交量(手)": number;
+  "最近一周成交额(亿元)": number;
+  "过去3周最大周成交量(手)": number;
+  周放量倍数: number;
+}
+
+export interface EtfVolumeSurgeResponse {
+  count: number;
+  data: EtfVolumeSurgeData[];
+}
+
 const API_BASE_URL = 'http://8.138.97.142:8000';
 
 /**
@@ -134,6 +167,50 @@ export const fetchWeeklyVolumeSurge = async (): Promise<WeeklyVolumeSurgeData[]>
     return result.data;
   } catch (error) {
     console.error('Failed to fetch weekly volume surge data:', error);
+    throw error;
+  }
+};
+
+/**
+ * 获取底部反转数据
+ */
+export const fetchBottomReversal = async (): Promise<BottomReversalData[]> => {
+  try {
+    const url = `${API_BASE_URL}/weekly_bottom_reversal`;
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result: BottomReversalResponse = await response.json();
+    return result.data;
+  } catch (error) {
+    console.error('Failed to fetch bottom reversal data:', error);
+    throw error;
+  }
+};
+
+/**
+ * 获取ETF周线放量数据
+ */
+export const fetchEtfVolumeSurge = async (
+  min_ratio: number = 1.5,
+  lookback_weeks: number = 3,
+  min_last_week_amount_yi: number = 1.0
+): Promise<EtfVolumeSurgeData[]> => {
+  try {
+    const url = `${API_BASE_URL}/etf_weekly_volume_surge?min_ratio=${min_ratio}&lookback_weeks=${lookback_weeks}&min_last_week_amount_yi=${min_last_week_amount_yi}`;
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result: EtfVolumeSurgeResponse = await response.json();
+    return result.data;
+  } catch (error) {
+    console.error('Failed to fetch ETF volume surge data:', error);
     throw error;
   }
 };
